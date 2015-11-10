@@ -10,7 +10,7 @@ ADMIN_PASSWORD=$pw
 SERVICE_HOST=$IP
 
 
-echo "Setting up OpenStack demo controller..."
+echo "Setting up openstack demo controller..."
 
 function install_packages () {
     test $# -gt 0 || return
@@ -110,7 +110,7 @@ echo "export HOST_IP=$IP
 . /etc/bash.openstackrc
 setcreds admin $pw" >> /etc/bash.bashrc.local
 
-install_packages patterns-OpenStack-controller patterns-OpenStack-compute-node patterns-OpenStack-clients patterns-OpenStack-network-node crudini psmisc
+install_packages patterns-cloud-controller patterns-cloud-compute patterns-cloud-user patterns-cloud-network crudini psmisc
 
 if [ "x$with_tempest" = "xyes" ]; then
     install_packages openstack-nova-objectstore openstack-neutron-lbaas-agent \
@@ -119,7 +119,7 @@ fi
 
 if [ "$DB" = "postgresql" ] ; then
     if grep -q "SUSE Linux Enterprise Server 11" /etc/SuSE-release; then
-        install_packages postgresql91-server python-psycopg2
+        install_packages postgresql94-server python-psycopg2
     else
         install_packages postgresql-server python-psycopg2
     fi
@@ -152,12 +152,6 @@ if [ "$DB" = "postgresql" ] ; then
         stop_and_disable_service $DB
     fi
     if ! grep -q ::/0 $DATADIR/pg_hba.conf ; then
-        sed -i "s/^\(host .*\) ident\(.*\)/\1 md5 \2/" "$DATADIR/pg_hba.conf"
-        sed -i "s/^\(local \)/local horizon all md5 sameuser\n\1/" "$DATADIR/pg_hba.conf"
-        # allow remote connections:
-        echo "listen_addresses = '*'" >> $DATADIR/postgresql.conf
-        echo "host all all 0.0.0.0/0 md5  sameuser" >> $DATADIR/pg_hba.conf
-        echo "host all all      ::/0 md5  sameuser" >> $DATADIR/pg_hba.conf
         if ! rpm -q postgresql | grep -q postgresql-8 ; then
             sed -i 's/\s*sameuser$//' $DATADIR/pg_hba.conf # adapt config syntax to postgresql-9
         fi
@@ -234,7 +228,7 @@ else
 fi
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-set -e
+# set -e
 
 # configure bridge
 if grep -q eth0 /proc/net/dev && [ ! -e /etc/sysconfig/network/ifcfg-$br ] ; then
@@ -272,7 +266,7 @@ EOF
 fi
 
 #-----------------------------------------
-# setup OpenStack Dashboard (optional)
+# setup openstack Dashboard (optional)
 #-----------------------------------------
 
 
